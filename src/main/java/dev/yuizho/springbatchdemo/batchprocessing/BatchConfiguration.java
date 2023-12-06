@@ -75,9 +75,10 @@ public class BatchConfiguration {
                               JdbcBatchItemWriter<Person> writer,
                               TaskExecutor taskExecutor,
                               Partitioner stepPertitioner) {
-        // FIXME: 同じデータが複数回処理されていそう
+        // https://spring.pleiades.io/spring-batch/reference/scalability.html
         return new StepBuilder("partitionStep", jobRepository)
                 .partitioner("slaveStep", stepPertitioner)
+                .gridSize(3)
                 .step(step1(jobRepository, transactionManager, reader, processor, writer))
                 .taskExecutor(taskExecutor)
                 .build();
