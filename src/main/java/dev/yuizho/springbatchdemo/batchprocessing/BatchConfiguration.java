@@ -3,6 +3,7 @@ package dev.yuizho.springbatchdemo.batchprocessing;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.job.builder.JobBuilder;
+import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.partition.support.Partitioner;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
@@ -16,7 +17,6 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
-import org.springframework.scheduling.config.Task;
 
 import javax.sql.DataSource;
 
@@ -50,6 +50,7 @@ public class BatchConfiguration {
     @Bean
     public Job importUserJob(JobRepository jobRepository, Step partitionStep, JobCompletionNotificationListener listener) {
         return new JobBuilder("importUserJob", jobRepository)
+                .incrementer(new RunIdIncrementer())
                 .listener(listener)
                 .start(partitionStep)
                 .build();
