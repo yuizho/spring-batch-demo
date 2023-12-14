@@ -1,11 +1,28 @@
+version: "3.8"
+
 services:
   db:
     image: mysql:8.1
     ports:
-      - 3306
+      - "127.0.0.1:3306:3306"
     environment:
       MYSQL_ROOT_PASSWORD: password
       MYSQL_USER: user
       MYSQL_PASSWORD: password
       MYSQL_DATABASE: db
     restart: always
+
+  localstack:
+    container_name: "${LOCALSTACK_DOCKER_NAME-localstack}"
+    image: localstack/localstack
+    ports:
+      - "127.0.0.1:4566:4566"            # LocalStack Gateway
+    environment:
+      - DEBUG=${DEBUG-}
+      - DOCKER_HOST=unix:///var/run/docker.sock
+    volumes:
+      - "${LOCALSTACK_VOLUME_DIR:-./volume}:/var/lib/localstack"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "./src/main/resources/sample-data.csv:/tmp/sample-data.csv"
+      # https://docs.localstack.cloud/references/init-hooks/#usage-example
+      - "./init-localstack.sh:/etc/localstack/init/ready.d/init-localstack.sh"

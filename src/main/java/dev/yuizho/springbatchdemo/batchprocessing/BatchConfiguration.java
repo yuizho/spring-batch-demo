@@ -1,5 +1,7 @@
 package dev.yuizho.springbatchdemo.batchprocessing;
 
+import com.fasterxml.jackson.dataformat.csv.CsvMapper;
+import io.awspring.cloud.s3.S3ObjectConverter;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.job.builder.JobBuilder;
@@ -13,7 +15,7 @@ import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.batch.item.file.builder.FlatFileItemReaderBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -23,10 +25,11 @@ import javax.sql.DataSource;
 @Configuration
 public class BatchConfiguration {
     @Bean
-    public FlatFileItemReader<Person> reader() {
+    public FlatFileItemReader<Person> reader(ResourceLoader resourceLoader) {
         return new FlatFileItemReaderBuilder<Person>()
                 .name("personItemReader")
-                .resource(new ClassPathResource("sample-data.csv"))
+                // https://www.baeldung.com/spring-cloud-aws-s3
+                .resource(resourceLoader.getResource("s3://test-bucket/test-bucket/csv/sample-data.csv"))
                 .delimited()
                 .names("firstName", "lastName")
                 .targetType(Person.class)
@@ -94,5 +97,10 @@ public class BatchConfiguration {
                 .processor(processor)
                 .writer(writer)
                 .build();
+    }
+
+    @Bean
+    public S3ObjectConverter s3ObjectConverter() {
+        return new Jackson2CsvS3ObjectConverter(new CsvMapper());
     }
 }
