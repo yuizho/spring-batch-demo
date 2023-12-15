@@ -31,8 +31,8 @@ public class BatchConfiguration {
         return new FlatFileItemReaderBuilder<Person>()
                 .name("personItemReader")
                 // https://www.baeldung.com/spring-cloud-aws-s3
-                .resource(resourceLoader.getResource("s3://test-bucket/test-bucket/csv/sample-data.csv"))
-                //.resource(new ClassPathResource("sample-data.csv"))
+                //.resource(resourceLoader.getResource("s3://test-bucket/test-bucket/csv/sample-data.csv"))
+                .resource(new ClassPathResource("sample-data.csv"))
                 .delimited()
                 .names("firstName", "lastName")
                 .targetType(Person.class)
