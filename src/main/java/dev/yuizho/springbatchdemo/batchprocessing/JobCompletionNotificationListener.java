@@ -5,7 +5,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobExecutionListener;
-import org.springframework.jdbc.core.DataClassRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
@@ -24,12 +23,10 @@ public class JobCompletionNotificationListener implements JobExecutionListener {
         if (jobExecution.getStatus() == BatchStatus.COMPLETED) {
             LOGGER.info("!!!JOB FINISHED! Time to verify the results");
 
-            var sql = """
-                    SELECT first_name, last_name FROM people
-                    """;
-            jdbcTemplate
-                    .query(sql, new DataClassRowMapper<>(Person.class))
-                    .forEach(person -> LOGGER.info("Found <{{}}> in the database", person));
+            var sql = "SELECT count(*) FROM people ";
+            var count = jdbcTemplate.queryForObject(sql, Integer.class);
+
+            LOGGER.info("Found {} records in the database", count);
         }
     }
 }
