@@ -14,6 +14,7 @@ import org.springframework.batch.item.database.JdbcBatchItemWriter;
 import org.springframework.batch.item.database.builder.JdbcBatchItemWriterBuilder;
 import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.batch.item.file.builder.FlatFileItemReaderBuilder;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
@@ -27,12 +28,15 @@ import javax.sql.DataSource;
 @Configuration
 public class BatchConfiguration {
     @Bean
-    public FlatFileItemReader<Person> reader(ResourceLoader resourceLoader) {
+    public FlatFileItemReader<Person> reader(
+            ResourceLoader resourceLoader,
+            // e.g. "s3://test-bucket/test-bucket/csv/sample-data.csv"
+            @Value("${s3.url.person-data-csv}") String s3ResourceUrl
+    ) {
         return new FlatFileItemReaderBuilder<Person>()
                 .name("personItemReader")
                 // https://www.baeldung.com/spring-cloud-aws-s3
-                //.resource(resourceLoader.getResource("s3://test-bucket/test-bucket/csv/sample-data.csv"))
-                .resource(new ClassPathResource("sample-data.csv"))
+                .resource(resourceLoader.getResource(s3ResourceUrl))
                 .delimited()
                 .names("firstName", "lastName")
                 .targetType(Person.class)
