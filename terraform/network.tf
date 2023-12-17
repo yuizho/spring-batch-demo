@@ -133,3 +133,36 @@ resource "aws_vpc_endpoint" "cloudwatch_logs" {
     module.vpc_endpoint_sg.security_group_id
   ]
 }
+
+resource "aws_vpc_endpoint" "ecr_api" {
+  vpc_endpoint_type   = "Interface"
+  vpc_id              = aws_vpc.batch_vpc.id
+  service_name        = "com.amazonaws.ap-northeast-1.ecr.api"
+  subnet_ids          = [for i in aws_subnet.batch_subnet_private : i.id]
+  private_dns_enabled = true
+  security_group_ids = [
+    module.vpc_endpoint_sg.security_group_id
+  ]
+}
+
+resource "aws_vpc_endpoint" "ecr_dkr" {
+  vpc_endpoint_type   = "Interface"
+  vpc_id              = aws_vpc.batch_vpc.id
+  service_name        = "com.amazonaws.ap-northeast-1.ecr.dkr"
+  subnet_ids          = [for i in aws_subnet.batch_subnet_private : i.id]
+  private_dns_enabled = true
+  security_group_ids = [
+    module.vpc_endpoint_sg.security_group_id
+  ]
+}
+
+resource "aws_vpc_endpoint" "secretsmanager" {
+  vpc_endpoint_type   = "Interface"
+  vpc_id              = aws_vpc.batch_vpc.id
+  service_name        = "com.amazonaws.ap-northeast-1.secretsmanager"
+  subnet_ids          = [for i in aws_subnet.batch_subnet_private : i.id]
+  private_dns_enabled = true
+  security_group_ids = [
+    module.vpc_endpoint_sg.security_group_id
+  ]
+}
