@@ -3,6 +3,9 @@ resource "aws_vpc" "batch_vpc" {
   cidr_block           = "10.0.0.0/16"
   enable_dns_support   = true
   enable_dns_hostnames = true
+  tags = {
+    Name : "batch-vpc"
+  }
 }
 
 resource "aws_subnet" "batch_subnet_public" {
@@ -66,6 +69,14 @@ module "vpc_endpoint_sg" {
   vpc_id      = aws_vpc.batch_vpc.id
   ports       = [443]
   cidr_blocks = [aws_vpc.batch_vpc.cidr_block]
+}
+
+module "batch_db_sg" {
+  source                   = "./modules/security_group"
+  name                     = "batch-db--sg"
+  vpc_id                   = aws_vpc.batch_vpc.id
+  ports                    = [3306]
+  source_security_group_id = module.able_to_access_rds_sg.security_group_id
 }
 
 # VPC Endpoint
