@@ -5,8 +5,8 @@ resource "aws_ecs_cluster" "batch_ecs_cluster" {
 
 resource "aws_ecs_task_definition" "app_ecs_task_definition" {
   family                   = "batch"
-  cpu                      = "256"
-  memory                   = "512"
+  cpu                      = "1024"
+  memory                   = "3072"
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
   execution_role_arn       = module.ecs_task_execution_role.iam_role_arn
