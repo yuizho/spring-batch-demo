@@ -1,3 +1,7 @@
+locals {
+  account_id = data.aws_caller_identity.current.account_id
+}
+
 # source policy documents
 data "aws_iam_policy" "ec2_for_ssm" {
   arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
@@ -74,6 +78,45 @@ data "aws_iam_policy_document" "ecs_task" {
 }
 
 
+data "aws_iam_policy_document" "stepfunctions_ecs_task_execution" {
+  statement {
+    effect = "Allow"
+    actions = [
+      "logs:CreateLogDelivery",
+      "logs:GetLogDelivery",
+      "logs:UpdateLogDelivery",
+      "logs:DeleteLogDelivery",
+      "logs:ListLogDeliveries",
+      "logs:PutResourcePolicy",
+      "logs:DescribeResourcePolicies",
+      "logs:DescribeLogGroups",
+      "xray:PutTraceSegments",
+      "xray:PutTelemetryRecords",
+      "xray:GetSamplingRules",
+      "xray:GetSamplingTargets"
+    ]
+    resources = ["*"]
+  }
+
+  statement {
+    effect = "Allow"
+    actions = [
+      "ecs:RunTask"
+    ]
+    resources = [aws_ecs_task_definition.app_ecs_task_definition.arn]
+  }
+
+  statement {
+    sid    = "VisualEditor0"
+    effect = "Allow"
+    actions = [
+      "iam:PassRole"
+    ]
+    resources = ["arn:aws:iam::${local.account_id}:role/*"]
+  }
+}
+
+
 # iam role
 module "ec2_for_ssm_role" {
   source = "./modules/iam_role"
@@ -95,4 +138,11 @@ module "ecs_task_role" {
   name       = "app-ecs-task"
   identifier = "ecs-tasks.amazonaws.com"
   policy     = data.aws_iam_policy_document.ecs_task.json
+}
+
+module "stepfunctions_ecs_task_execution_role" {
+  source     = "./modules/iam_role"
+  name       = "stepfunctions-ecs-task-execution"
+  identifier = "states.amazonaws.com"
+  policy     = data.aws_iam_policy_document.stepfunctions_ecs_task_execution.json
 }
